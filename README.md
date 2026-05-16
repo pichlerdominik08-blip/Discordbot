@@ -16,22 +16,25 @@ Ein Discord Bot mit Web-Dashboard zum Verwalten von Verstoessen und Informatione
 ## Projektstruktur
 
 ```
-discord-panel/
-├── bot/                  # Discord Bot
-│   ├── bot.py            # Bot-Skript
-│   ├── requirements.txt  # Python-Abhängigkeiten
-│   └── .env.example      # Beispiel-Umgebungsvariablen
-├── discord-panel-backend/ # FastAPI Backend (API)
+Discordbot/
+├── bot.py               # Discord Bot
+├── requirements.txt     # Bot Python-Abhaengigkeiten
+├── .env.example         # Beispiel-Umgebungsvariablen
+├── discloud.config      # DisCloud Konfiguration
+├── backend/             # FastAPI Backend (API)
 │   ├── app/
-│   │   ├── main.py       # API-Endpunkte
-│   │   └── database.py   # Datenbank-Schema
-│   └── pyproject.toml    # Python-Abhängigkeiten
-├── discord-panel-frontend/ # React Frontend (Webseite)
+│   │   ├── main.py      # API-Endpunkte
+│   │   └── database.py  # Datenbank-Schema
+│   ├── pyproject.toml   # Backend-Abhaengigkeiten
+│   ├── Dockerfile       # Fuer Render Deployment
+│   └── render.yaml      # Render Konfiguration
+├── frontend/            # React Frontend (Webseite)
 │   ├── src/
-│   │   ├── pages/        # Dashboard, GuildView, EntryDetail
-│   │   ├── lib/api.ts    # API-Client
-│   │   └── App.tsx       # Router
-│   └── .env              # API-URL Konfiguration
+│   │   ├── pages/       # Dashboard, GuildView, EntryDetail
+│   │   ├── lib/api.ts   # API-Client
+│   │   └── App.tsx      # Router
+│   ├── .env.example     # API-URL Konfiguration
+│   └── vercel.json      # Vercel Konfiguration
 └── README.md
 ```
 
@@ -52,59 +55,58 @@ discord-panel/
    - Bot Permissions: `Administrator`
 6. Generierte URL oeffnen und Bot zum Server einladen
 
-### 2. Backend starten
+### 2. Backend auf Render deployen (kostenlos)
+
+1. Gehe zu https://render.com und erstelle einen Account
+2. Klicke "New" → "Web Service"
+3. Verbinde dein GitHub Repository `Discordbot`
+4. Einstellungen:
+   - **Root Directory**: `backend`
+   - **Runtime**: `Docker`
+   - **Plan**: `Free`
+5. Fuege unter "Environment" hinzu:
+   - `DB_PATH` = `/data/app.db`
+6. Klicke "Create Web Service"
+7. Warte bis deployed → **Kopiere die URL** (z.B. `https://discordbot-xxxx.onrender.com`)
+
+### 3. Frontend auf Vercel deployen (kostenlos)
+
+1. Gehe zu https://vercel.com und erstelle einen Account
+2. Klicke "Import Project" und waehle dein `Discordbot` Repository
+3. Einstellungen:
+   - **Root Directory**: `frontend`
+   - **Framework Preset**: `Vite`
+4. Fuege unter "Environment Variables" hinzu:
+   - `VITE_API_URL` = `https://deine-render-url.onrender.com` (die URL von Schritt 2.7)
+5. Klicke "Deploy"
+6. Warte bis deployed → Das ist deine **Webseiten-URL**!
+
+### 4. Bot auf DisCloud deployen
+
+1. Bearbeite die `.env` Datei:
+   ```
+   DISCORD_TOKEN=dein-bot-token
+   API_URL=https://deine-render-url.onrender.com
+   ```
+2. Bearbeite `discloud.config` und setze deine Bot-ID
+3. Lade auf DisCloud hoch: `bot.py`, `requirements.txt`, `.env`, `discloud.config`
+4. Bot starten
+
+### Lokal testen (optional)
 
 ```bash
-cd discord-panel-backend
-
-# Abhaengigkeiten installieren
-pip install poetry
-poetry install
-
-# Umgebungsvariable setzen (Pfad zur Datenbank)
-export DB_PATH=./data/app.db
-
-# Server starten
-mkdir -p data
+# Backend
+cd backend && pip install poetry && poetry install
+export DB_PATH=./data/app.db && mkdir -p data
 poetry run fastapi dev app/main.py --port 8000
+
+# Bot (neues Terminal)
+cp .env.example .env  # Token + API_URL eintragen
+pip install -r requirements.txt && python bot.py
+
+# Frontend (neues Terminal)
+cd frontend && npm install && npm run dev
 ```
-
-Das Backend laeuft jetzt auf `http://localhost:8000`
-
-### 3. Discord Bot starten
-
-```bash
-cd bot
-
-# Abhaengigkeiten installieren
-pip install -r requirements.txt
-
-# .env Datei erstellen
-cp .env.example .env
-# Bearbeite .env und setze deinen DISCORD_TOKEN und API_URL
-
-# Bot starten
-python bot.py
-```
-
-### 4. Frontend starten
-
-```bash
-cd discord-panel-frontend
-
-# Abhaengigkeiten installieren
-npm install
-
-# .env anpassen (API URL setzen)
-# Datei: .env
-# VITE_API_URL=http://localhost:8000   (lokal)
-# VITE_API_URL=https://deine-api.fly.dev  (deployed)
-
-# Entwicklungsserver starten
-npm run dev
-```
-
-Das Frontend laeuft auf `http://localhost:5173`
 
 ### 5. Discord Setup
 
@@ -163,18 +165,10 @@ Das Frontend laeuft auf `http://localhost:5173`
 
 ---
 
-## Hosting / Deployment
+## Hosting
 
-### Backend (z.B. auf Fly.io, Railway, etc.)
-- FastAPI App deployen
-- `DB_PATH` Environment Variable auf persistenten Speicher setzen (z.B. `/data/app.db`)
-
-### Frontend
-- `npm run build` ausfuehren
-- Den `dist` Ordner als statische Webseite hosten (z.B. Vercel, Netlify, etc.)
-- `VITE_API_URL` auf die deployed Backend URL setzen
-
-### Bot
-- Auf einem Server laufen lassen (z.B. VPS, Raspberry Pi, etc.)
-- `DISCORD_TOKEN` und `API_URL` in der `.env` Datei setzen
-- Am besten mit `screen` oder `systemd` dauerhaft laufen lassen
+| Komponente | Service | Kosten |
+|------------|---------|--------|
+| Backend | [Render.com](https://render.com) | Kostenlos |
+| Frontend | [Vercel.com](https://vercel.com) | Kostenlos |
+| Bot | [DisCloud](https://discloud.com) | Dein bestehender Plan |
