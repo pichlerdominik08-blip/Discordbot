@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: discord-panel-backend
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DB_PATH
+        value: /data/app.db
+    disk:
+      name: discord-panel-data
+      mountPath: /data
+      sizeGB: 1
