@@ -8,8 +8,7 @@ from dotenv import load_dotenv
  
 load_dotenv()
  
-TOKEN = os.getenv("MTQ1NTE3MzI3ODM3NjEzNjc4OA.G7aWQl.-k8l69kTyQWydX8OUxz2wGV8AB6HRR9_3_Tzx0", "")
-API_URL = os.getenv("API_URL", "http://localhost:8000")
+TOKEN = os.getenv("Token")
  
 intents = discord.Intents.default()
 intents.guilds = True
@@ -626,4 +625,4 @@ async def on_ready():
  
 
 
-bot.run("MTQ1NTE3MzI3ODM3NjEzNjc4OA.G7aWQl.-k8l69kTyQWydX8OUxz2wGV8AB6HRR9_3_Tzx0")
+bot.run("Token")
